@@ -9,3 +9,5 @@ This repo aims to gather all the code for the bathymetry project. This code is m
   Python for the USVs to navigate and communiate with the BS
 -The PSoC code 
   For the USV motor handling (PID) and Integrity monitoring (Temp and Water Ingress)
+
+#Wiki: https://github.com/Saultes45/Bathymetry/wiki
