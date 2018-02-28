@@ -1,0 +1,51 @@
+%% Gathering data
+
+info.GNSSDuration = datevec(max(timeArrayGPS) - min(timeArrayGPS));
+info.GNSSExecTimeHours = info.GNSSDuration(4);
+info.GNSSExecTimeMinutes = info.GNSSDuration(5);
+info.GNSSExecTimeSeconds = info.GNSSDuration(6);
+
+info.SonarDuration = datevec(max(timeArraySonar) - min(timeArraySonar));
+info.SonarExecTimeHours = info.SonarDuration(4);
+info.SonarExecTimeMinutes = info.SonarDuration(5);
+info.SonarExecTimeSeconds = info.SonarDuration(6);
+
+info.TotalNumberOfMessages = length(SonarMessage) + length(GPSMessage);
+info.PercentOfGNSSMessages = (length(GPSMessage) / info.TotalNumberOfMessages) * 100;
+info.PercentOfSonarMessages = (length(SonarMessage) / info.TotalNumberOfMessages) * 100;
+
+%% Find all the Sonar messages that contains the DPT
+% $AADPT,40.24,0.00*72
+cnt = 1;
+for cnt_Sonar = 1 : length(SonarMessage)
+   if strcmp(SonarMessage{cnt_Sonar}(4:6), 'DPT')
+       IndeXDPT(cnt) = cnt_Sonar; %#ok<SAGROW>
+       cnt = cnt + 1; 
+   end
+end
+% DPTMessages = cellfun(@x GPSMessage{x}, , 'UniformOutput', 'false');
+
+DPTTime = timeArraySonar(IndeXDPT); % the number of days from January 0, 0000
+info.SonarAquisitionPeriod = diff(DPTTime) * 24 * 3600; %transformation to number of sec
+% figure(), semilogy(info.SonarAquisitionPeriod, 'rx-'); xlabel('Sample Number [N/A]'); ylabel('Elapsed time betwen messages [s]');grid on;
+
+%% Find all the GPS messages that contains the RMC
+cnt = 1;
+for cnt_GPS = 1 : length(GPSMessage)
+   if strcmp(GPSMessage{cnt_GPS}(4:6), 'RMC')
+       IndeXRMC(cnt) = cnt_GPS; %#ok<SAGROW>
+       cnt = cnt + 1; 
+   end
+end
+% DPTMessages = cellfun(@x GPSMessage{x}, , 'UniformOutput', 'false');
+
+RMCTime = timeArrayGPS(IndeXRMC); % the number of days from January 0, 0000
+info.GPSAquisitionPeriod = diff(RMCTime) * 24 * 3600; %transformation to number of sec
+figure(), semilogy(info.GPSAquisitionPeriod, 'rx-'); xlabel('Sample number [N/A]'); ylabel('Elapsed time between 2 messages [s]');grid on;
+
+
+
+%% Creating string for dialogbox
+DialogBoxMessage = {...
+    ['GNSS Execution time: '                                num2str(info.GNSSExecTimeHours) 'h, ' num2str(info.GNSSExecTimeMinutes) 'm, ' num2str(info.GNSSExecTimeSeconds) 's'],...
+    ['Sonar Execution time: '                               num2str(info.SonarExecTimeHours) 'h, ' num2str(info.SonarExecTimeMinutes) 'm, ' num2str(info.SonarExecTimeSe
